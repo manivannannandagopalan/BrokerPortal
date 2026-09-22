@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from uuid import UUID
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Response, status
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Response, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +8,9 @@ from .auth import require_permission
 from .config import get_settings
 from .database import get_db, init_db
 from .duck_creek import DuckCreekGateway
-from .models import AuditEvent, Guideline, Submission, User
+from .models import AuditEvent, DCTUserAdmin, Guideline, Submission, User
+from .dct_schemas import DCTImportResponse, DCTUserAdminResponse
+from .dct_useradmin import ALL_COLUMNS, _validate, read_rows
 from .schemas import AuditResponse, GuidelineResponse, IntegrationHealth, SubmissionCreate, SubmissionResponse, UserCreate, UserResponse, UserStatusUpdate
 
 app = FastAPI(title="BrokerPortal API", version="1.0.0", description="Headless broker operations API")
@@ -76,3 +78,33 @@ async def audit_events(search: str | None = None, db: AsyncSession = Depends(get
     query = select(AuditEvent)
     if search: query = query.where((AuditEvent.event_type.ilike(f"%{search}%")) | (AuditEvent.correlation_id.ilike(f"%{search}%")))
     return list((await db.execute(query.order_by(AuditEvent.occurred_at.desc()))).scalars().all())
+
+@app.get("/api/dct-useradmin", response_model=list[DCTUserAdminResponse])
+async def list_dct_useradmin(search: str | None = None, db: AsyncSession = Depends(get_db), _: dict = Depends(require_permission("users.read"))):
+    query = select(DCTUserAdmin).order_by(DCTUserAdmin.name)
+    if search: query = query.where(DCTUserAdmin.name.ilike(f"%{search}%"))
+    return list((await db.execute(query)).scalars().all())
+
+@app.post("/api/dct-useradmin/import", response_model=DCTImportResponse)
+async def import_dct_useradmin(file: UploadFile = File(...), db: AsyncSession = Depends(get_db), _: dict = Depends(require_permission("users.invite"))):
+    if not file.filename: raise HTTPException(status.HTTP_400_BAD_REQUEST, "A CSV, XLS, or XLSX file is required")
+    try:
+        rows, columns = read_rows(file.filename, await file.read())
+    except (ValueError, ImportError) as error:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(error)) from error
+    missing = [column for column in ALL_COLUMNS if column in ("id", "inttype", "name") and column not in columns]
+    if missing: return DCTImportResponse(imported=0, updated=0, skipped=0, errors=[{"row": 1, "message": f"Missing required columns: {', '.join(missing)}"}], columns=columns)
+    imported = updated = skipped = 0
+    errors = []
+    for row_number, row in enumerate(rows, start=2):
+        row = {column: row.get(column, "") for column in ALL_COLUMNS}
+        row_errors = _validate(row, row_number)
+        if row_errors: errors.extend(row_errors); skipped += 1; continue
+        values = {column: (int(row[column]) if column in ("id", "intparentid", "inttype") and row[column] else row[column] or None) for column in ALL_COLUMNS}
+        entity = await db.get(DCTUserAdmin, values["id"])
+        if entity is None: db.add(DCTUserAdmin(**values)); imported += 1
+        else:
+            for column, value in values.items(): setattr(entity, column, value)
+            updated += 1
+    await db.commit()
+    return DCTImportResponse(imported=imported, updated=updated, skipped=skipped, errors=errors, columns=columns)

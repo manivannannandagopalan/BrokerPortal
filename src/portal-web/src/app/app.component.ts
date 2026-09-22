@@ -16,6 +16,7 @@ export class AppComponent {
   guidelineSearch = '';
   submissionStage = 'all';
   guidelineLine = 'all';
+  dctImportResult: { imported: number; updated: number; skipped: number; errors: { row: number; column?: string; message: string }[] } | null = null;
   readonly users = [
     { initials: 'JR', name: 'Jordan Rivers', email: 'jordan.rivers@northstar.com', broker: 'Northstar Financial', role: 'Broker admin', status: 'Active', tone: 'coral' },
     { initials: 'SK', name: 'Sarah Kim', email: 'sarah.kim@meridian.com', broker: 'Meridian Partners', role: 'Operations', status: 'Active', tone: 'green' },
@@ -35,6 +36,20 @@ export class AppComponent {
   ];
 
   setView(view: string): void { this.view = view; }
+  async importDctFile(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const response = await fetch('http://127.0.0.1:5082/api/dct-useradmin/import', { method: 'POST', body: form });
+      this.dctImportResult = await response.json();
+    } catch {
+      this.dctImportResult = { imported: 0, updated: 0, skipped: 0, errors: [{ row: 0, message: 'FastAPI is not reachable. Start the local API first.' }] };
+    }
+    input.value = '';
+  }
   get filteredUsers() { const q = this.userSearch.toLowerCase(); return this.users.filter(user => !q || `${user.name} ${user.email} ${user.broker}`.toLowerCase().includes(q)); }
   get filteredSubmissions() { return this.submissions.filter(item => this.submissionStage === 'all' || item.stage === this.submissionStage); }
   get filteredGuidelines() { const q = this.guidelineSearch.toLowerCase(); return this.guidelines.filter(item => (!q || `${item.title} ${item.summary}`.toLowerCase().includes(q)) && (this.guidelineLine === 'all' || item.line === this.guidelineLine)); }

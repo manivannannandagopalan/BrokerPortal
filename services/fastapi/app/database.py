@@ -26,6 +26,6 @@ async def get_db() -> AsyncIterator[AsyncSession]:
         yield session
 
 async def init_db() -> None:
-    from .models import AuditEvent, Guideline, Policy, Submission, User  # noqa: F401
+    from .models import AuditEvent, DCTUserAdmin, Guideline, Policy, Submission, User  # noqa: F401
     async with get_engine().begin() as connection:
         await connection.run_sync(Base.metadata.create_all)

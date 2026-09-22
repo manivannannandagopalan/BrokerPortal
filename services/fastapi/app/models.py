@@ -52,3 +52,21 @@ class AuditEvent(Base):
     correlation_id: Mapped[str] = mapped_column(String(80), index=True)
     outcome: Mapped[str] = mapped_column(String(20))
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+class DCTUserAdmin(Base):
+    __tablename__ = "DCTUserAdmin"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    intparentid: Mapped[int | None]
+    inttype: Mapped[int]
+    name: Mapped[str] = mapped_column(String(50), index=True)
+    contact: Mapped[str | None] = mapped_column(String(100))
+    phone: Mapped[str | None] = mapped_column(String(50))
+    phoneext: Mapped[str | None] = mapped_column(String(50))
+    address1: Mapped[str | None] = mapped_column(String(255))
+    address2: Mapped[str | None] = mapped_column(String(255))
+    city: Mapped[str | None] = mapped_column(String(100))
+    state: Mapped[str | None] = mapped_column(String(5))
+    zip: Mapped[str | None] = mapped_column(String(10))
+    reference: Mapped[str | None] = mapped_column(String(20))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
