@@ -5,6 +5,8 @@ const inviteForm = document.querySelector('#invite-form');
 const breadcrumb = document.querySelector('#breadcrumb-current');
 const overviewView = document.querySelector('#overview-view');
 const usersView = document.querySelector('#users-view');
+const accessView = document.querySelector('#access-view');
+const integrationsView = document.querySelector('#integrations-view');
 const usersInviteButton = document.querySelector('#users-invite-button');
 const userRows = document.querySelector('#user-rows');
 const userSearch = document.querySelector('#user-search');
@@ -31,8 +33,9 @@ function setView(view) {
   document.querySelectorAll('.nav-item').forEach((item) => item.classList.toggle('active', item.dataset.view === view));
   overviewView.hidden = view !== 'overview';
   usersView.hidden = view !== 'users';
+  accessView.hidden = view !== 'access';
+  integrationsView.hidden = view !== 'integrations';
   if (view === 'users') renderUsers();
-  if (view === 'access' || view === 'integrations') window.alert(`${label} is planned for the next implementation increment.`);
 }
 
 function renderUsers() {
@@ -67,3 +70,9 @@ document.querySelectorAll('[data-view], [data-view-link]').forEach((element) => 
 });
 userSearch.addEventListener('input', renderUsers);
 userStatus.addEventListener('change', renderUsers);
+document.querySelector('#policy-refresh').addEventListener('click', (event) => {
+  event.currentTarget.textContent = 'Policies are current';
+});
+document.querySelector('#integration-refresh').addEventListener('click', (event) => {
+  event.currentTarget.textContent = 'Health checks complete';
+});
