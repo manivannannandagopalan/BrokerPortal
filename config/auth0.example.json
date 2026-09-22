@@ -1,0 +1,8 @@
+{
+  "Auth0": {
+    "Domain": "your-tenant.us.auth0.com",
+    "Audience": "https://api.brokerportal.example",
+    "ClientId": "replace-with-environment-secret",
+    "Scopes": ["openid", "profile", "email"]
+  }
+}
