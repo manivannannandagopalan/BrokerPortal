@@ -21,6 +21,8 @@
         <button class="nav-item" data-view="access"><span class="nav-icon">&#9670;</span>Access policies</button>
         <button class="nav-item" data-view="integrations"><span class="nav-icon">&#8644;</span>Integrations</button>
         <button class="nav-item" data-view="audit"><span class="nav-icon">&#9776;</span>Audit trail</button>
+        <button class="nav-item" data-view="commercial"><span class="nav-icon">&#9638;</span>Small Commercial</button>
+        <button class="nav-item" data-view="guidelines"><span class="nav-icon">&#10003;</span>Underwriting Guidelines</button>
       </nav>
       <div class="sidebar-footer">
         <div class="connection-status"><span class="status-dot"></span><span>All systems nominal</span></div>
@@ -74,6 +76,16 @@
           <section class="page-heading"><div><p class="eyebrow">Security and compliance</p><h1>Audit trail</h1><p class="heading-copy">Trace administrative actions across users, policies, and integrations.</p></div><button class="secondary-button" id="export-audit">Export CSV</button></section>
           <section class="panel user-toolbar"><div class="search-field"><span>&#8981;</span><input id="audit-search" type="search" placeholder="Search events or correlation IDs" aria-label="Search audit events"></div><select id="audit-type" aria-label="Filter audit event type"><option value="all">All event types</option><option value="access">Access</option><option value="policy">Policy</option><option value="integration">Integration</option></select></section>
           <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Immutable activity record</p><h2><span id="audit-count">6</span> events</h2></div><span class="sync-label">Retention: 365 days</span></div><div class="table-scroll"><table><thead><tr><th>Event</th><th>Actor</th><th>Broker scope</th><th>Time</th><th>Correlation ID</th><th>Outcome</th></tr></thead><tbody id="audit-rows"></tbody></table></div></section>
+        </section>
+        <section id="commercial-view" class="users-view" hidden>
+          <section class="page-heading"><div><p class="eyebrow">Broker production</p><h1>Small Commercial Portal</h1><p class="heading-copy">Move small-business submissions from intake to bind with less friction.</p></div><button class="primary-button" id="new-submission"><span>+</span> New submission</button></section>
+          <section class="metric-grid"><article class="metric-card accent-blue"><p>Open submissions</p><strong>24</strong><span class="trend up">&#8593; 12% <em>this month</em></span></article><article class="metric-card accent-teal"><p>Quotes ready</p><strong>8</strong><span class="trend up">4 awaiting review</span></article><article class="metric-card accent-orange"><p>Average response</p><strong>3.4h</strong><span class="trend up">&#8595; 18% <em>vs last month</em></span></article><article class="metric-card accent-purple"><p>Bound premium</p><strong>$184k</strong><span class="trend up">&#8593; 9.1% <em>this quarter</em></span></article></section>
+          <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Work queue</p><h2>Recent submissions</h2></div><select id="submission-filter" aria-label="Filter submissions"><option value="all">All stages</option><option value="review">Needs review</option><option value="quoted">Quote ready</option><option value="bound">Bound</option></select></div><div class="table-scroll"><table><thead><tr><th>Applicant</th><th>Line of business</th><th>Broker</th><th>Updated</th><th>Stage</th><th></th></tr></thead><tbody id="submission-rows"></tbody></table></div></section>
+        </section>
+        <section id="guidelines-view" class="users-view" hidden>
+          <section class="page-heading"><div><p class="eyebrow">Risk appetite</p><h1>Underwriting Guidelines</h1><p class="heading-copy">Keep appetite, referral triggers, and required documentation visible to every broker.</p></div><button class="secondary-button" id="guideline-refresh">Check for updates</button></section>
+          <section class="panel user-toolbar"><div class="search-field"><span>&#8981;</span><input id="guideline-search" type="search" placeholder="Search guidelines or industries" aria-label="Search underwriting guidelines"></div><select id="guideline-line" aria-label="Filter guideline line"><option value="all">All lines</option><option value="general">General liability</option><option value="property">Property</option><option value="workers">Workers compensation</option></select></section>
+          <section class="guideline-grid" id="guideline-cards"></section>
         </section>
       </div>
     </main>

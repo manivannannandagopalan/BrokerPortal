@@ -8,6 +8,8 @@ const usersView = document.querySelector('#users-view');
 const accessView = document.querySelector('#access-view');
 const integrationsView = document.querySelector('#integrations-view');
 const auditView = document.querySelector('#audit-view');
+const commercialView = document.querySelector('#commercial-view');
+const guidelinesView = document.querySelector('#guidelines-view');
 const usersInviteButton = document.querySelector('#users-invite-button');
 const userRows = document.querySelector('#user-rows');
 const userSearch = document.querySelector('#user-search');
@@ -28,6 +30,18 @@ const auditEvents = [
   { event: 'Access request denied', type: 'access', actor: 'Policy engine', scope: 'BlueRock Insurance', time: 'Sep 20, 2026', correlation: 'c-7e0d12', outcome: 'Denied' },
   { event: 'Auth0 configuration updated', type: 'integration', actor: 'Alex Morgan', scope: 'Platform', time: 'Sep 18, 2026', correlation: 'c-09c4ab', outcome: 'Success' }
 ];
+const submissions = [
+  { applicant: 'Harbor Street Cafe', line: 'General liability', broker: 'Northstar Financial', updated: '18 minutes ago', stage: 'review' },
+  { applicant: 'Pine & Co. Contractors', line: 'Workers compensation', broker: 'Meridian Partners', updated: '42 minutes ago', stage: 'quoted' },
+  { applicant: 'Atlas Design Studio', line: 'Business owners policy', broker: 'BlueRock Insurance', updated: '2 hours ago', stage: 'review' },
+  { applicant: 'Juniper Retail Group', line: 'Commercial property', broker: 'Northstar Financial', updated: 'Yesterday', stage: 'bound' }
+];
+const guidelines = [
+  { title: 'General liability: artisan contractors', line: 'general', summary: 'Eligible risks with annual revenue up to $5M and no high-hazard operations.', version: 'v3.2', review: 'Reviewed Sep 18, 2026', status: 'Current' },
+  { title: 'Commercial property: retail occupancy', line: 'property', summary: 'Eligible retail occupancy with protected construction and a maximum location value of $10M.', version: 'v2.8', review: 'Reviewed Sep 12, 2026', status: 'Current' },
+  { title: 'Workers compensation: office risks', line: 'workers', summary: 'Standard appetite for office classes with fewer than 100 employees and no remote-site exposure.', version: 'v4.1', review: 'Review due Oct 01, 2026', status: 'Review due' },
+  { title: 'Referral triggers and exclusions', line: 'general', summary: 'Refer hazardous materials, liquor liability, prior losses, and unsupported operations to underwriting.', version: 'v1.9', review: 'Reviewed Aug 30, 2026', status: 'Current' }
+];
 
 function showModal() {
   modal.hidden = false;
@@ -37,7 +51,7 @@ function hideModal() {
   modal.hidden = true;
 }
 function setView(view) {
-  const label = view === 'users' ? 'User management' : view === 'access' ? 'Access policies' : view === 'integrations' ? 'Integrations' : 'Overview';
+  const label = view === 'users' ? 'User management' : view === 'access' ? 'Access policies' : view === 'integrations' ? 'Integrations' : view === 'audit' ? 'Audit trail' : view === 'commercial' ? 'Small Commercial' : view === 'guidelines' ? 'Underwriting Guidelines' : 'Overview';
   breadcrumb.textContent = label;
   document.querySelectorAll('.nav-item').forEach((item) => item.classList.toggle('active', item.dataset.view === view));
   overviewView.hidden = view !== 'overview';
@@ -45,8 +59,12 @@ function setView(view) {
   accessView.hidden = view !== 'access';
   integrationsView.hidden = view !== 'integrations';
   auditView.hidden = view !== 'audit';
+  commercialView.hidden = view !== 'commercial';
+  guidelinesView.hidden = view !== 'guidelines';
   if (view === 'users') renderUsers();
   if (view === 'audit') renderAudit();
+  if (view === 'commercial') renderSubmissions();
+  if (view === 'guidelines') renderGuidelines();
 }
 
 function renderUsers() {
@@ -69,6 +87,23 @@ function renderAudit() {
   });
   document.querySelector('#audit-count').textContent = filtered.length;
   document.querySelector('#audit-rows').innerHTML = filtered.map((item) => `<tr><td><strong>${item.event}</strong><small class="table-subtitle">${item.type}</small></td><td>${item.actor}</td><td>${item.scope}</td><td>${item.time}</td><td><span class="correlation-id">${item.correlation}</span></td><td><span class="status-pill ${item.outcome === 'Success' ? 'live' : 'pending'}">${item.outcome}</span></td></tr>`).join('') || '<tr><td colspan="6" class="empty-state">No audit events match these filters.</td></tr>';
+}
+
+function renderSubmissions() {
+  const stage = document.querySelector('#submission-filter').value;
+  const filtered = submissions.filter((submission) => stage === 'all' || submission.stage === stage);
+  const labels = { review: 'Needs review', quoted: 'Quote ready', bound: 'Bound' };
+  document.querySelector('#submission-rows').innerHTML = filtered.map((submission) => `<tr><td><strong>${submission.applicant}</strong><small class="table-subtitle">Submission #SC-${submission.applicant.length}42</small></td><td>${submission.line}</td><td>${submission.broker}</td><td>${submission.updated}</td><td><span class="status-pill ${submission.stage === 'review' ? 'pending' : 'live'}">${labels[submission.stage]}</span></td><td><button class="row-menu" aria-label="${submission.applicant} actions">&#8942;</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty-state">No submissions match this stage.</td></tr>';
+}
+
+function renderGuidelines() {
+  const query = document.querySelector('#guideline-search').value.trim().toLowerCase();
+  const line = document.querySelector('#guideline-line').value;
+  const filtered = guidelines.filter((guideline) => {
+    const matchesQuery = !query || `${guideline.title} ${guideline.summary}`.toLowerCase().includes(query);
+    return matchesQuery && (line === 'all' || guideline.line === line);
+  });
+  document.querySelector('#guideline-cards').innerHTML = filtered.map((guideline) => `<article class="panel guideline-card"><div class="guideline-card-head"><span class="guideline-icon">&#10003;</span><span class="status-pill ${guideline.status === 'Current' ? 'live' : 'pending'}">${guideline.status}</span></div><p class="eyebrow">${guideline.line}</p><h2>${guideline.title}</h2><p>${guideline.summary}</p><div class="guideline-meta"><span>${guideline.version}</span><span>${guideline.review}</span></div><button class="text-button">View guideline <span>&#8594;</span></button></article>`).join('') || '<p class="empty-state">No guidelines match these filters.</p>';
 }
 
 inviteButton.addEventListener('click', showModal);
@@ -108,4 +143,13 @@ document.querySelector('#policy-refresh').addEventListener('click', (event) => {
 });
 document.querySelector('#integration-refresh').addEventListener('click', (event) => {
   event.currentTarget.textContent = 'Health checks complete';
+});
+document.querySelector('#new-submission').addEventListener('click', () => {
+  window.alert('New submission workspace is ready for broker intake.');
+});
+document.querySelector('#submission-filter').addEventListener('change', renderSubmissions);
+document.querySelector('#guideline-search').addEventListener('input', renderGuidelines);
+document.querySelector('#guideline-line').addEventListener('change', renderGuidelines);
+document.querySelector('#guideline-refresh').addEventListener('click', (event) => {
+  event.currentTarget.textContent = 'Guidelines are current';
 });
