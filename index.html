@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BrokerPortal operations workspace">
+  <title>BrokerPortal | Operations</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">BP</span>
+        <span>Broker<span>Portal</span></span>
+      </div>
+      <div class="workspace-label">Operations workspace</div>
+      <nav class="nav-list">
+        <button class="nav-item active" data-view="overview"><span class="nav-icon">&#9632;</span>Overview</button>
+        <button class="nav-item" data-view="users"><span class="nav-icon">&#9673;</span>User management</button>
+        <button class="nav-item" data-view="access"><span class="nav-icon">&#9670;</span>Access policies</button>
+        <button class="nav-item" data-view="integrations"><span class="nav-icon">&#8644;</span>Integrations</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="connection-status"><span class="status-dot"></span><span>All systems nominal</span></div>
+        <div class="profile-mini"><span class="avatar">AM</span><span><strong>Alex Morgan</strong><small>Platform admin</small></span><button class="icon-button" aria-label="Account menu">&#8942;</button></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="Open navigation">&#9776;</button>
+        <div class="breadcrumbs"><span>BrokerPortal</span><strong>/</strong><span id="breadcrumb-current">Overview</span></div>
+        <div class="topbar-actions"><button class="icon-button" aria-label="Search">&#8981;</button><button class="icon-button notification" aria-label="Notifications">&#9673;<span></span></button><button class="help-button">Need help?</button></div>
+      </header>
+
+      <div class="content-wrap" id="app-content">
+        <section class="page-heading">
+          <div><p class="eyebrow">Tuesday, September 22, 2026</p><h1>Good morning, Alex.</h1><p class="heading-copy">Here is what needs your attention across the broker network.</p></div>
+          <button class="primary-button" id="invite-button"><span>+</span> Invite user</button>
+        </section>
+
+        <section class="metric-grid" aria-label="Network summary">
+          <article class="metric-card accent-blue"><div class="metric-icon">&#9673;</div><p>Active users</p><strong>1,284</strong><span class="trend up">&#8593; 8.2% <em>vs last month</em></span></article>
+          <article class="metric-card accent-teal"><div class="metric-icon">&#10003;</div><p>Connected brokers</p><strong>48</strong><span class="trend up">&#8593; 4.6% <em>vs last month</em></span></article>
+          <article class="metric-card accent-orange"><div class="metric-icon">&#9888;</div><p>Pending reviews</p><strong>17</strong><span class="trend neutral">Needs attention <em>this week</em></span></article>
+          <article class="metric-card accent-purple"><div class="metric-icon">&#8644;</div><p>System uptime</p><strong>99.98%</strong><span class="trend up">&#8593; 0.04% <em>this quarter</em></span></article>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel activity-panel"><div class="panel-heading"><div><p class="eyebrow">Network activity</p><h2>User activity</h2></div><select aria-label="Activity range"><option>Last 30 days</option><option>Last 7 days</option><option>Last 90 days</option></select></div><div class="chart-wrap"><div class="chart-y"><span>1,500</span><span>1,000</span><span>500</span><span>0</span></div><div class="chart"><div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div><svg viewBox="0 0 720 220" role="img" aria-label="User activity rising over the last 30 days"><defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3879ef" stop-opacity=".22"/><stop offset="1" stop-color="#3879ef" stop-opacity="0"/></linearGradient></defs><path class="chart-area" d="M0 180 C35 171 43 154 75 158 S115 137 145 150 S185 130 220 136 S256 91 294 113 S328 106 361 117 S390 79 427 94 S470 58 505 72 S545 39 574 63 S626 42 658 47 S693 18 720 29 V220 H0Z"/><path class="chart-line" d="M0 180 C35 171 43 154 75 158 S115 137 145 150 S185 130 220 136 S256 91 294 113 S328 106 361 117 S390 79 427 94 S470 58 505 72 S545 39 574 63 S626 42 658 47 S693 18 720 29"/></svg><div class="chart-x"><span>Aug 24</span><span>Aug 31</span><span>Sep 07</span><span>Sep 14</span><span>Sep 21</span></div></div></div></article>
+          <article class="panel review-panel"><div class="panel-heading"><div><p class="eyebrow">Your queue</p><h2>Pending reviews</h2></div><button class="text-button" data-view-link="users">View all <span>&#8594;</span></button></div><div class="review-list"><div class="review-item"><span class="review-avatar coral">JR</span><div><strong>Jordan Rivers</strong><small>Access request · Northstar</small></div><span class="review-time">2h ago</span></div><div class="review-item"><span class="review-avatar green">SK</span><div><strong>Sarah Kim</strong><small>Role change · Meridian</small></div><span class="review-time">5h ago</span></div><div class="review-item"><span class="review-avatar blue">MC</span><div><strong>Marcus Chen</strong><small>New account · BlueRock</small></div><span class="review-time">Yesterday</span></div></div><button class="secondary-button full-width" data-view-link="users">Review requests</button></article>
+        </section>
+
+        <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Recently updated</p><h2>Broker directory</h2></div><button class="secondary-button" data-view-link="users">Manage directory</button></div><div class="table-scroll"><table><thead><tr><th>Broker</th><th>Users</th><th>Integration</th><th>Last activity</th><th>Status</th><th></th></tr></thead><tbody><tr><td><div class="broker-name"><span class="broker-logo navy">N</span><span><strong>Northstar Financial</strong><small>BRK-00481</small></span></div></td><td>248</td><td><span class="integration connected"><i></i> Duck Creek</span></td><td>12 minutes ago</td><td><span class="status-pill live">Active</span></td><td><button class="row-menu" aria-label="Northstar actions">&#8942;</button></td></tr><tr><td><div class="broker-name"><span class="broker-logo orange">M</span><span><strong>Meridian Partners</strong><small>BRK-00327</small></span></div></td><td>184</td><td><span class="integration connected"><i></i> Duck Creek</span></td><td>38 minutes ago</td><td><span class="status-pill live">Active</span></td><td><button class="row-menu" aria-label="Meridian actions">&#8942;</button></td></tr><tr><td><div class="broker-name"><span class="broker-logo violet">B</span><span><strong>BlueRock Insurance</strong><small>BRK-00612</small></span></div></td><td>96</td><td><span class="integration pending"><i></i> Configuring</span></td><td>2 hours ago</td><td><span class="status-pill pending">Pending</span></td><td><button class="row-menu" aria-label="BlueRock actions">&#8942;</button></td></tr></tbody></table></div></section>
+      </div>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="invite-modal" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="invite-title"><button class="modal-close" aria-label="Close">&times;</button><p class="eyebrow">New access</p><h2 id="invite-title">Invite a user</h2><p class="modal-copy">Create an invitation for a broker administrator.</p><form id="invite-form"><label>Work email<input type="email" name="email" placeholder="name@company.com" required></label><label>Broker<select name="broker"><option>Northstar Financial</option><option>Meridian Partners</option><option>BlueRock Insurance</option></select></label><button class="primary-button full-width" type="submit">Send invitation</button></form></div></div>
+  <script src="app.js"></script>
+</body>
+</html>

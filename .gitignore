@@ -1,0 +1,21 @@
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+
+# Local configuration
+.env
+.env.*
+!*.env.example
+appsettings.Development.json
