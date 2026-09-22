@@ -22,6 +22,16 @@ def correlation(value: str | None) -> str:
 @app.on_event("startup")
 async def startup() -> None:
     await init_db()
+    if get_settings().environment == "development":
+        async for db in get_db():
+            if not await db.scalar(select(AuditEvent.id).limit(1)):
+                db.add_all([
+                    AuditEvent(event_type="User invitation created", actor="local-admin", broker_scope="Northstar Financial", correlation_id="local-seed-001", outcome="success"),
+                    AuditEvent(event_type="DCTUserAdmin bulk import", actor="local-admin", broker_scope="All brokers", correlation_id="local-seed-002", outcome="success"),
+                    AuditEvent(event_type="Duck Creek health check", actor="System", broker_scope="All brokers", correlation_id="local-seed-003", outcome="success"),
+                ])
+                await db.commit()
+            break
 
 @app.get("/health")
 async def health() -> dict:
