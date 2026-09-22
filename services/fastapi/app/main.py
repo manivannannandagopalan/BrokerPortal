@@ -14,7 +14,7 @@ from .dct_useradmin import ALL_COLUMNS, _validate, read_rows
 from .schemas import AuditResponse, GuidelineResponse, IntegrationHealth, SubmissionCreate, SubmissionResponse, UserCreate, UserResponse, UserStatusUpdate
 
 app = FastAPI(title="BrokerPortal API", version="1.0.0", description="Headless broker operations API")
-app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:4174", "http://localhost:4174", "http://127.0.0.1:4173", "http://localhost:4173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:4175", "http://localhost:4175", "http://127.0.0.1:4174", "http://localhost:4174", "http://127.0.0.1:4173", "http://localhost:4173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 def correlation(value: str | None) -> str:
     return value or UUID(int=0).hex[:12]

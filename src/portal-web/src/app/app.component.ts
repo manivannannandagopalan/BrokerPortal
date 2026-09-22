@@ -44,7 +44,8 @@ export class AppComponent {
     form.append('file', file);
     try {
       const response = await fetch('http://127.0.0.1:5082/api/dct-useradmin/import', { method: 'POST', body: form });
-      this.dctImportResult = await response.json();
+      const result = await response.json();
+      this.dctImportResult = response.ok ? result : { imported: 0, updated: 0, skipped: 0, errors: [{ row: 0, message: result.detail || `Import failed with HTTP ${response.status}` }] };
     } catch {
       this.dctImportResult = { imported: 0, updated: 0, skipped: 0, errors: [{ row: 0, message: 'FastAPI is not reachable. Start the local API first.' }] };
     }
