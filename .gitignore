@@ -19,3 +19,6 @@ obj/
 .env.*
 !*.env.example
 appsettings.Development.json
+
+# Preserve the pre-existing scaffold checkout without nesting its Git metadata.
+BrokerProtal/
