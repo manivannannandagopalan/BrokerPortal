@@ -3,11 +3,15 @@ using BrokerPortal.IdentityApi.Domain;
 using BrokerPortal.IdentityApi.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<IDuckCreekUserGateway, MockDuckCreekUserGateway>();
-builder.Services.AddSingleton<UserStore>();
+var connectionString = builder.Configuration.GetConnectionString("BrokerPortal")
+    ?? throw new InvalidOperationException("ConnectionStrings:BrokerPortal is required.");
+builder.Services.AddDbContext<PortalDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddScoped<UserStore>();
 var auth0Domain = builder.Configuration["Auth0:Domain"];
 var auth0Audience = builder.Configuration["Auth0:Audience"];
 if (!string.IsNullOrWhiteSpace(auth0Domain) && !string.IsNullOrWhiteSpace(auth0Audience))
@@ -32,6 +36,10 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    await scope.ServiceProvider.GetRequiredService<PortalDbContext>().Database.EnsureCreatedAsync();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 app.Use(async (context, next) =>
@@ -44,47 +52,31 @@ app.Use(async (context, next) =>
 });
 app.MapHealthChecks("/health").AllowAnonymous();
 
-app.MapGet("/api/users", (string? search, string? status, Guid? brokerId, UserStore store) =>
+app.MapGet("/api/users", async (string? search, string? status, Guid? brokerId, UserStore store, CancellationToken cancellationToken) =>
 {
-    var users = store.All.Where(user =>
-        (string.IsNullOrWhiteSpace(search) || $"{user.Name} {user.Email}".Contains(search, StringComparison.OrdinalIgnoreCase)) &&
-        (string.IsNullOrWhiteSpace(status) || user.Status.ToString().Equals(status, StringComparison.OrdinalIgnoreCase)) &&
-        (!brokerId.HasValue || user.BrokerId == brokerId.Value));
+    var users = await store.SearchAsync(search, status, brokerId, cancellationToken);
     return Results.Ok(users.Select(UserResponse.From));
 }).RequireAuthorization("users.read");
 
 app.MapPost("/api/users/invitations", async (InvitationRequest request, UserStore store, IDuckCreekUserGateway gateway, CancellationToken cancellationToken) =>
 {
-    if (store.All.Any(user => user.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase) && user.Status == UserStatus.Pending)) return Results.Conflict();
+    if (await store.HasPendingInvitationAsync(request.Email, cancellationToken)) return Results.Conflict();
     var user = new User(Guid.NewGuid(), request.Email.Split('@')[0], request.Email, request.BrokerId, request.Role, UserStatus.Pending, null);
-    store.Add(user);
+    await store.AddAsync(user, cancellationToken);
     await gateway.ProvisionUserAsync(user, cancellationToken);
     return Results.Accepted($"/api/users/{user.Id}", UserResponse.From(user));
 }).RequireAuthorization("users.invite");
 
-app.MapPatch("/api/users/{userId:guid}/status", (Guid userId, StatusChangeRequest request, UserStore store) =>
+app.MapPatch("/api/users/{userId:guid}/status", async (Guid userId, StatusChangeRequest request, UserStore store, CancellationToken cancellationToken) =>
 {
-    var user = store.Find(userId);
+    var user = await store.FindAsync(userId, cancellationToken);
     if (user is null) return Results.NotFound();
     var updated = user with { Status = request.Status };
-    store.Replace(updated);
+    await store.ReplaceAsync(updated, cancellationToken);
     return Results.Ok(UserResponse.From(updated));
 }).RequireAuthorization("users.status.write");
 
 app.Run();
-
-public sealed class UserStore
-{
-    private readonly List<User> users = [];
-    public IReadOnlyList<User> All => users;
-    public void Add(User user) => users.Add(user);
-    public User? Find(Guid id) => users.FirstOrDefault(user => user.Id == id);
-    public void Replace(User replacement)
-    {
-        var index = users.FindIndex(user => user.Id == replacement.Id);
-        if (index >= 0) users[index] = replacement;
-    }
-}
 
 public sealed class MissingConfigurationAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {

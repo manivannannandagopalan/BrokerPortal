@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: brokerportal-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: brokerportal
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-brokerportal-local}
+    ports:
+      - "5432:5432"
+    volumes:
+      - brokerportal-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  brokerportal-postgres-data:

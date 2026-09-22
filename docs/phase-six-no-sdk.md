@@ -4,7 +4,8 @@ The Windows machine does not currently have a usable .NET SDK. The following por
 
 - `tools/mock-api.ps1` mirrors the health, user listing, and invitation contract.
 - `tools/smoke-test.ps1` verifies health, correlation IDs, filtering, and invitations.
-- `database/migrations/001_initial_schema.sql` defines the SQL Server persistence foundation.
+- `database/migrations/001_initial_schema.sql` preserves the future SQL Server migration path.
+- `database/migrations/002_postgresql_initial_schema.sql` defines the active PostgreSQL persistence foundation.
 - `config/authorization-policies.json` defines deny-by-default roles and broker scope.
 - `config/auth0.example.json` documents the browser/API identity configuration without real secrets.
 
@@ -21,3 +22,5 @@ powershell -ExecutionPolicy Bypass -File .\tools\smoke-test.ps1
 ```
 
 The mock is for local contract testing only. It does not provide JWT validation, SQL persistence, or production authorization enforcement; those remain responsibilities of the ASP.NET Core service.
+
+The ASP.NET Core service now uses PostgreSQL through EF Core and Npgsql. Set `ConnectionStrings__BrokerPortal` in the environment before running it; the development compose file provides a local database when Docker is available.
