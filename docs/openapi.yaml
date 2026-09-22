@@ -1,0 +1,194 @@
+openapi: 3.0.3
+info:
+  title: BrokerPortal Identity API
+  version: 0.1.0
+  description: Contract for broker-scoped identity, authorization, health, and audit operations.
+servers:
+  - url: https://api.example.invalid
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      security: []
+      summary: API health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/users:
+    get:
+      summary: List broker users
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Status'
+        - name: brokerId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Matching users
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/users/invitations:
+    post:
+      summary: Invite a broker user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvitationRequest' }
+      responses:
+        '202':
+          description: Invitation accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invitation' }
+        '409': { description: A pending invitation already exists }
+  /api/users/{userId}/status:
+    patch:
+      summary: Change user status
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StatusChange' }
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+  /api/policies:
+    get:
+      summary: List authorization policies
+      responses:
+        '200':
+          description: Policies visible to the caller
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Policy' }
+  /api/integrations/health:
+    get:
+      summary: Check configured integrations
+      responses:
+        '200':
+          description: Integration health results
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/IntegrationHealth' }
+  /api/audit-events:
+    get:
+      summary: Search audit events
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - name: type
+          in: query
+          schema: { type: string, enum: [access, policy, integration] }
+      responses:
+        '200':
+          description: Audit events
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AuditEvent' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Search:
+      name: search
+      in: query
+      schema: { type: string, maxLength: 120 }
+    Status:
+      name: status
+      in: query
+      schema: { type: string, enum: [active, pending, suspended] }
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    Unauthorized:
+      description: Missing or invalid access token
+    Forbidden:
+      description: Caller lacks the required broker-scoped policy
+  schemas:
+    User:
+      type: object
+      required: [id, name, email, brokerId, role, status]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        brokerId: { type: string, format: uuid }
+        role: { type: string, enum: [broker_admin, operations, viewer] }
+        status: { type: string, enum: [active, pending, suspended] }
+        lastSignIn: { type: string, format: date-time, nullable: true }
+    InvitationRequest:
+      type: object
+      required: [email, brokerId, role]
+      properties:
+        email: { type: string, format: email }
+        brokerId: { type: string, format: uuid }
+        role: { type: string, enum: [broker_admin, operations, viewer] }
+    Invitation:
+      type: object
+      required: [id, email, status]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        status: { type: string, enum: [pending, accepted, expired] }
+    StatusChange:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [active, suspended] }
+        reason: { type: string, maxLength: 500 }
+    Policy:
+      type: object
+      required: [id, name, version, status]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        version: { type: integer }
+        status: { type: string, enum: [draft, published, retired] }
+        permissions: { type: array, items: { type: string } }
+    IntegrationHealth:
+      type: object
+      required: [name, status, checkedAt]
+      properties:
+        name: { type: string, enum: [duck_creek, auth0, sql_server] }
+        status: { type: string, enum: [operational, degraded, unavailable, planned] }
+        latencyMs: { type: integer, nullable: true }
+        checkedAt: { type: string, format: date-time }
+    AuditEvent:
+      type: object
+      required: [id, eventType, actor, correlationId, occurredAt, outcome]
+      properties:
+        id: { type: string, format: uuid }
+        eventType: { type: string }
+        actor: { type: string }
+        brokerScope: { type: string }
+        correlationId: { type: string }
+        occurredAt: { type: string, format: date-time }
+        outcome: { type: string, enum: [success, denied, failure] }
