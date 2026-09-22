@@ -20,5 +20,9 @@ obj/
 !*.env.example
 appsettings.Development.json
 
+# FastAPI / Python
+services/fastapi/.venv/
+services/fastapi/**/__pycache__/
+*.py[cod]
 # Preserve the pre-existing scaffold checkout without nesting its Git metadata.
 BrokerProtal/

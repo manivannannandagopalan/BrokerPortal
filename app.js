@@ -67,13 +67,25 @@ function setView(view) {
   if (view === 'guidelines') renderGuidelines();
 }
 
-function renderUsers() {
+async function renderUsers() {
   const query = userSearch.value.trim().toLowerCase();
   const status = userStatus.value;
-  const filtered = users.filter((user) => {
+  let filtered = users.filter((user) => {
     const matchesQuery = !query || `${user.name} ${user.email} ${user.broker}`.toLowerCase().includes(query);
     return matchesQuery && (status === 'all' || user.status === status);
   });
+  try {
+    const remoteUsers = await window.brokerPortalApi.users({ search: query, status });
+    filtered = remoteUsers.map((user) => ({
+      ...user,
+      initials: user.name.split(' ').map((part) => part[0]).join('').slice(0, 2),
+      broker: user.broker_id,
+      signIn: user.last_sign_in || 'Invitation sent',
+      tone: 'blue'
+    }));
+  } catch {
+    // Keep the offline seed data visible when the API is not running.
+  }
   document.querySelector('#user-count').textContent = filtered.length;
   userRows.innerHTML = filtered.map((user) => `<tr><td><div class="broker-name"><span class="review-avatar ${user.tone}">${user.initials}</span><span><strong>${user.name}</strong><small>${user.email}</small></span></div></td><td>${user.broker}</td><td><span class="role-label">${user.role}</span></td><td>${user.signIn}</td><td><span class="status-pill ${user.status === 'active' ? 'live' : 'pending'}">${user.status === 'active' ? 'Active' : 'Pending'}</span></td><td><button class="row-menu" aria-label="${user.name} actions">&#8942;</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty-state">No users match these filters.</td></tr>';
 }
@@ -89,21 +101,39 @@ function renderAudit() {
   document.querySelector('#audit-rows').innerHTML = filtered.map((item) => `<tr><td><strong>${item.event}</strong><small class="table-subtitle">${item.type}</small></td><td>${item.actor}</td><td>${item.scope}</td><td>${item.time}</td><td><span class="correlation-id">${item.correlation}</span></td><td><span class="status-pill ${item.outcome === 'Success' ? 'live' : 'pending'}">${item.outcome}</span></td></tr>`).join('') || '<tr><td colspan="6" class="empty-state">No audit events match these filters.</td></tr>';
 }
 
-function renderSubmissions() {
+async function renderSubmissions() {
   const stage = document.querySelector('#submission-filter').value;
-  const filtered = submissions.filter((submission) => stage === 'all' || submission.stage === stage);
+  let filtered = submissions.filter((submission) => stage === 'all' || submission.stage === stage);
+  try {
+    const remoteSubmissions = await window.brokerPortalApi.submissions(stage === 'all' ? {} : { stage });
+    filtered = remoteSubmissions.map((submission) => ({
+      applicant: submission.applicant,
+      line: submission.line_of_business,
+      broker: submission.broker_id,
+      updated: submission.updated_at,
+      stage: submission.stage
+    }));
+  } catch {
+    // Keep the offline seed data visible when the API is not running.
+  }
   const labels = { review: 'Needs review', quoted: 'Quote ready', bound: 'Bound' };
   document.querySelector('#submission-rows').innerHTML = filtered.map((submission) => `<tr><td><strong>${submission.applicant}</strong><small class="table-subtitle">Submission #SC-${submission.applicant.length}42</small></td><td>${submission.line}</td><td>${submission.broker}</td><td>${submission.updated}</td><td><span class="status-pill ${submission.stage === 'review' ? 'pending' : 'live'}">${labels[submission.stage]}</span></td><td><button class="row-menu" aria-label="${submission.applicant} actions">&#8942;</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty-state">No submissions match this stage.</td></tr>';
 }
 
-function renderGuidelines() {
+async function renderGuidelines() {
   const query = document.querySelector('#guideline-search').value.trim().toLowerCase();
   const line = document.querySelector('#guideline-line').value;
-  const filtered = guidelines.filter((guideline) => {
+  let filtered = guidelines.filter((guideline) => {
     const matchesQuery = !query || `${guideline.title} ${guideline.summary}`.toLowerCase().includes(query);
     return matchesQuery && (line === 'all' || guideline.line === line);
   });
-  document.querySelector('#guideline-cards').innerHTML = filtered.map((guideline) => `<article class="panel guideline-card"><div class="guideline-card-head"><span class="guideline-icon">&#10003;</span><span class="status-pill ${guideline.status === 'Current' ? 'live' : 'pending'}">${guideline.status}</span></div><p class="eyebrow">${guideline.line}</p><h2>${guideline.title}</h2><p>${guideline.summary}</p><div class="guideline-meta"><span>${guideline.version}</span><span>${guideline.review}</span></div><button class="text-button">View guideline <span>&#8594;</span></button></article>`).join('') || '<p class="empty-state">No guidelines match these filters.</p>';
+  try {
+    const remoteGuidelines = await window.brokerPortalApi.guidelines({ search: query, line: line === 'all' ? '' : line });
+    filtered = remoteGuidelines.map((guideline) => ({ ...guideline, review: guideline.effective_date }));
+  } catch {
+    // Keep the offline seed data visible when the API is not running.
+  }
+  document.querySelector('#guideline-cards').innerHTML = filtered.map((guideline) => `<article class="panel guideline-card"><div class="guideline-card-head"><span class="guideline-icon">&#10003;</span><span class="status-pill ${(guideline.status || '').toLowerCase().includes('current') ? 'live' : 'pending'}">${guideline.status}</span></div><p class="eyebrow">${guideline.line}</p><h2>${guideline.title}</h2><p>${guideline.summary}</p><div class="guideline-meta"><span>${guideline.version}</span><span>${guideline.review || guideline.effective_date || ''}</span></div><button class="text-button">View guideline <span>&#8594;</span></button></article>`).join('') || '<p class="empty-state">No guidelines match these filters.</p>';
 }
 
 inviteButton.addEventListener('click', showModal);
