@@ -35,6 +35,7 @@
       </header>
 
       <div class="content-wrap" id="app-content">
+        <div id="overview-view">
         <section class="page-heading">
           <div><p class="eyebrow">Tuesday, September 22, 2026</p><h1>Good morning, Alex.</h1><p class="heading-copy">Here is what needs your attention across the broker network.</p></div>
           <button class="primary-button" id="invite-button"><span>+</span> Invite user</button>
@@ -53,6 +54,12 @@
         </section>
 
         <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Recently updated</p><h2>Broker directory</h2></div><button class="secondary-button" data-view-link="users">Manage directory</button></div><div class="table-scroll"><table><thead><tr><th>Broker</th><th>Users</th><th>Integration</th><th>Last activity</th><th>Status</th><th></th></tr></thead><tbody><tr><td><div class="broker-name"><span class="broker-logo navy">N</span><span><strong>Northstar Financial</strong><small>BRK-00481</small></span></div></td><td>248</td><td><span class="integration connected"><i></i> Duck Creek</span></td><td>12 minutes ago</td><td><span class="status-pill live">Active</span></td><td><button class="row-menu" aria-label="Northstar actions">&#8942;</button></td></tr><tr><td><div class="broker-name"><span class="broker-logo orange">M</span><span><strong>Meridian Partners</strong><small>BRK-00327</small></span></div></td><td>184</td><td><span class="integration connected"><i></i> Duck Creek</span></td><td>38 minutes ago</td><td><span class="status-pill live">Active</span></td><td><button class="row-menu" aria-label="Meridian actions">&#8942;</button></td></tr><tr><td><div class="broker-name"><span class="broker-logo violet">B</span><span><strong>BlueRock Insurance</strong><small>BRK-00612</small></span></div></td><td>96</td><td><span class="integration pending"><i></i> Configuring</span></td><td>2 hours ago</td><td><span class="status-pill pending">Pending</span></td><td><button class="row-menu" aria-label="BlueRock actions">&#8942;</button></td></tr></tbody></table></div></section>
+        </div>
+        <section id="users-view" class="users-view" hidden>
+          <section class="page-heading"><div><p class="eyebrow">Access administration</p><h1>User management</h1><p class="heading-copy">Review identity, broker scope, and access status in one place.</p></div><button class="primary-button" id="users-invite-button"><span>+</span> Invite user</button></section>
+          <section class="panel user-toolbar"><div class="search-field"><span>&#8981;</span><input id="user-search" type="search" placeholder="Search by name or email" aria-label="Search users"></div><select id="user-status" aria-label="Filter by status"><option value="all">All statuses</option><option value="active">Active</option><option value="pending">Pending</option></select></section>
+          <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Directory</p><h2><span id="user-count">6</span> users</h2></div><span class="sync-label">Last synced just now</span></div><div class="table-scroll"><table><thead><tr><th>User</th><th>Broker</th><th>Role</th><th>Last sign-in</th><th>Status</th><th></th></tr></thead><tbody id="user-rows"></tbody></table></div></section>
+        </section>
       </div>
     </main>
   </div>
