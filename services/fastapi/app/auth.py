@@ -4,7 +4,7 @@ from .config import get_settings
 def claims(request: Request) -> dict:
     settings = get_settings()
     if settings.environment == "development" and not settings.auth0_domain:
-        return {"sub": "local-admin", "permissions": ["users.read", "users.invite", "users.status.write", "commercial.read", "commercial.write", "guidelines.read", "audit.read"], "broker_id": "*"}
+        return {"sub": "local-admin", "permissions": ["users.read", "users.invite", "users.status.write", "commercial.read", "commercial.write", "guidelines.read", "policies.read", "integrations.read", "audit.read"], "broker_id": "*"}
     authorization = request.headers.get("Authorization", "")
     if not authorization.startswith("Bearer "):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Bearer token required")

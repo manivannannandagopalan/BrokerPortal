@@ -68,6 +68,14 @@ async def list_guidelines(search: str | None = None, line: str | None = None, db
     if line: query = query.where(Guideline.line == line)
     return list((await db.execute(query.order_by(Guideline.effective_date.desc()))).scalars().all())
 
+@app.get("/api/policies")
+async def policies(_: dict = Depends(require_permission("policies.read"))):
+    return [
+        {"name": "broker_admin", "permissions": ["users.read", "users.invite", "users.status.write", "policies.read", "integrations.read", "audit.read"], "status": "published"},
+        {"name": "operations", "permissions": ["users.read", "users.invite", "integrations.read"], "status": "published"},
+        {"name": "viewer", "permissions": ["users.read"], "status": "published"},
+    ]
+
 @app.get("/api/integrations/health", response_model=list[IntegrationHealth])
 async def integrations(_: dict = Depends(require_permission("integrations.read"))):
     duck = await DuckCreekGateway().health(); now = datetime.now(timezone.utc)
