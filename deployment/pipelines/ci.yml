@@ -1,0 +1,38 @@
+name: broker-portal-ci
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+variables:
+  buildConfiguration: Release
+
+stages:
+  - stage: Validate
+    jobs:
+      - job: StaticChecks
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - script: dotnet restore
+            displayName: Restore .NET dependencies
+          - script: dotnet build --configuration $(buildConfiguration) --no-restore
+            displayName: Build .NET solution
+          - script: dotnet test --configuration $(buildConfiguration) --no-build
+            displayName: Run .NET tests
+          - script: npm ci
+            workingDirectory: src/portal-web
+            displayName: Install web dependencies
+          - script: npm run build
+            workingDirectory: src/portal-web
+            displayName: Build Angular application
+          - script: echo "Add organization-approved secret, dependency, SAST, and IaC scanners here"
+            displayName: Security scanning placeholder
