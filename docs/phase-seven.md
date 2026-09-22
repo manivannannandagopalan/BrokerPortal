@@ -17,4 +17,10 @@ The API expects an Auth0 access token with a `permissions` claim containing the 
 
 ## Verification
 
-The ASP.NET Core project is ready for `dotnet restore` and `dotnet build` in CI. The local machine still lacks the .NET SDK, so compilation remains delegated to the existing GitHub Actions .NET 8 job.
+The .NET 8.0.425 SDK is installed per-user at `C:\Users\Manivannan.N\.dotnet`. Local verification passed:
+
+- `dotnet build` completed with zero warnings and zero errors.
+- `GET /health` returned `200` with an `X-Correlation-ID` response header.
+- `GET /api/users` without a token returned `401` when Auth0 configuration is absent.
+
+Configure `Auth0:Domain` and `Auth0:Audience` to exercise valid JWT claims locally. The API intentionally fails closed until those values are supplied.

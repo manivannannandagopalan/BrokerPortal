@@ -1,6 +1,7 @@
 using BrokerPortal.IdentityApi.Application;
 using BrokerPortal.IdentityApi.Domain;
 using BrokerPortal.IdentityApi.Infrastructure;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,11 @@ if (!string.IsNullOrWhiteSpace(auth0Domain) && !string.IsNullOrWhiteSpace(auth0A
         options.RequireHttpsMetadata = true;
     });
 }
+else
+{
+    builder.Services.AddAuthentication("MissingConfiguration")
+        .AddScheme<AuthenticationSchemeOptions, MissingConfigurationAuthenticationHandler>("MissingConfiguration", _ => { });
+}
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("users.read", policy => policy.RequireAuthenticatedUser().RequireClaim("permissions", "users.read"));
@@ -26,10 +32,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
-if (!string.IsNullOrWhiteSpace(auth0Domain) && !string.IsNullOrWhiteSpace(auth0Audience))
-{
-    app.UseAuthentication();
-}
+app.UseAuthentication();
 app.UseAuthorization();
 app.Use(async (context, next) =>
 {
@@ -81,4 +84,18 @@ public sealed class UserStore
         var index = users.FindIndex(user => user.Id == replacement.Id);
         if (index >= 0) users[index] = replacement;
     }
+}
+
+public sealed class MissingConfigurationAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+{
+    public MissingConfigurationAuthenticationHandler(
+        Microsoft.Extensions.Options.IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        System.Text.Encodings.Web.UrlEncoder encoder)
+        : base(options, logger, encoder)
+    {
+    }
+
+    protected override Task<AuthenticateResult> HandleAuthenticateAsync() =>
+        Task.FromResult(AuthenticateResult.Fail("Auth0 is not configured."));
 }
