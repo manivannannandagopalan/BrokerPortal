@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -8,7 +8,6 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
   view = 'overview';
@@ -17,6 +16,7 @@ export class AppComponent {
   submissionStage = 'all';
   guidelineLine = 'all';
   dctImportResult: { imported: number; updated: number; skipped: number; errors: { row: number; column?: string; message: string }[] } | null = null;
+  dctRows: { id: number; inttype: number; name: string; contact?: string; city?: string; state?: string; reference?: string }[] = [];
   readonly users = [
     { initials: 'JR', name: 'Jordan Rivers', email: 'jordan.rivers@northstar.com', broker: 'Northstar Financial', role: 'Broker admin', status: 'Active', tone: 'coral' },
     { initials: 'SK', name: 'Sarah Kim', email: 'sarah.kim@meridian.com', broker: 'Meridian Partners', role: 'Operations', status: 'Active', tone: 'green' },
@@ -35,7 +35,15 @@ export class AppComponent {
     { title: 'Workers compensation: office risks', line: 'Workers compensation', summary: 'Standard appetite for office classes with fewer than 100 employees and no remote-site exposure.', version: 'v4.1', status: 'Review due', review: 'Review due Oct 01, 2026' }
   ];
 
-  setView(view: string): void { this.view = view; }
+  setView(view: string): void { this.view = view; if (view === 'dct-useradmin') void this.loadDctRows(); }
+  async loadDctRows(): Promise<void> {
+    try {
+      const response = await fetch('http://127.0.0.1:5082/api/dct-useradmin');
+      if (response.ok) this.dctRows = await response.json();
+    } catch {
+      this.dctRows = [];
+    }
+  }
   async importDctFile(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -46,6 +54,7 @@ export class AppComponent {
       const response = await fetch('http://127.0.0.1:5082/api/dct-useradmin/import', { method: 'POST', body: form });
       const result = await response.json();
       this.dctImportResult = response.ok ? result : { imported: 0, updated: 0, skipped: 0, errors: [{ row: 0, message: result.detail || `Import failed with HTTP ${response.status}` }] };
+      if (response.ok) await this.loadDctRows();
     } catch {
       this.dctImportResult = { imported: 0, updated: 0, skipped: 0, errors: [{ row: 0, message: 'FastAPI is not reachable. Start the local API first.' }] };
     }
