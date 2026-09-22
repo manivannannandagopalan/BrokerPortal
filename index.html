@@ -20,6 +20,7 @@
         <button class="nav-item" data-view="users"><span class="nav-icon">&#9673;</span>User management</button>
         <button class="nav-item" data-view="access"><span class="nav-icon">&#9670;</span>Access policies</button>
         <button class="nav-item" data-view="integrations"><span class="nav-icon">&#8644;</span>Integrations</button>
+        <button class="nav-item" data-view="audit"><span class="nav-icon">&#9776;</span>Audit trail</button>
       </nav>
       <div class="sidebar-footer">
         <div class="connection-status"><span class="status-dot"></span><span>All systems nominal</span></div>
@@ -68,6 +69,11 @@
         <section id="integrations-view" class="users-view" hidden>
           <section class="page-heading"><div><p class="eyebrow">Connected systems</p><h1>Integrations</h1><p class="heading-copy">Monitor identity and Duck Creek connectivity across the network.</p></div><button class="secondary-button" id="integration-refresh">Run health checks</button></section>
           <section class="integration-grid"><article class="panel integration-card"><div class="integration-card-head"><span class="system-mark duck">DC</span><span class="status-pill live">Operational</span></div><h2>Duck Creek</h2><p>Broker user administration gateway</p><div class="health-row"><span>Response time</span><strong>182 ms</strong></div><div class="health-row"><span>Last health check</span><strong>Just now</strong></div></article><article class="panel integration-card"><div class="integration-card-head"><span class="system-mark auth">AU</span><span class="status-pill live">Operational</span></div><h2>Auth0</h2><p>Authentication and identity provider</p><div class="health-row"><span>Response time</span><strong>96 ms</strong></div><div class="health-row"><span>Last health check</span><strong>Just now</strong></div></article><article class="panel integration-card"><div class="integration-card-head"><span class="system-mark sql">DB</span><span class="status-pill pending">Planned</span></div><h2>SQL Server</h2><p>Local user projection and audit store</p><div class="health-row"><span>Environment</span><strong>Foundation</strong></div><div class="health-row"><span>Next milestone</span><strong>API phase</strong></div></article></section>
+        </section>
+        <section id="audit-view" class="users-view" hidden>
+          <section class="page-heading"><div><p class="eyebrow">Security and compliance</p><h1>Audit trail</h1><p class="heading-copy">Trace administrative actions across users, policies, and integrations.</p></div><button class="secondary-button" id="export-audit">Export CSV</button></section>
+          <section class="panel user-toolbar"><div class="search-field"><span>&#8981;</span><input id="audit-search" type="search" placeholder="Search events or correlation IDs" aria-label="Search audit events"></div><select id="audit-type" aria-label="Filter audit event type"><option value="all">All event types</option><option value="access">Access</option><option value="policy">Policy</option><option value="integration">Integration</option></select></section>
+          <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Immutable activity record</p><h2><span id="audit-count">6</span> events</h2></div><span class="sync-label">Retention: 365 days</span></div><div class="table-scroll"><table><thead><tr><th>Event</th><th>Actor</th><th>Broker scope</th><th>Time</th><th>Correlation ID</th><th>Outcome</th></tr></thead><tbody id="audit-rows"></tbody></table></div></section>
         </section>
       </div>
     </main>
