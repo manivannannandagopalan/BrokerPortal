@@ -24,5 +24,6 @@ appsettings.Development.json
 services/fastapi/.venv/
 services/fastapi/**/__pycache__/
 *.py[cod]
+services/fastapi/*.local.db
 # Preserve the pre-existing scaffold checkout without nesting its Git metadata.
 BrokerProtal/

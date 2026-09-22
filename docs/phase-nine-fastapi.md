@@ -28,7 +28,7 @@ Set-Location services/fastapi
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 5082
 ```
 
-The current workstation has Python and the FastAPI dependencies installed, but Docker/PostgreSQL is not yet available. The service has passed Python compilation and dependency checks; live API persistence testing begins once PostgreSQL is running.
+The current workstation has Python and the FastAPI dependencies installed, but Docker/PostgreSQL is not yet available. For no-admin local work, the launcher automatically uses SQLite and persists to `services/fastapi/brokerportal.local.db`; the same SQLAlchemy models can switch to PostgreSQL through `BROKERPORTAL_DATABASE_URL`. The service has passed live local persistence testing for user invitations and commercial submissions.
 
 ## Production hardening
 

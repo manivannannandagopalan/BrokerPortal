@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from uuid import UUID
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from .auth import require_permission
@@ -11,6 +12,7 @@ from .models import AuditEvent, Guideline, Submission, User
 from .schemas import AuditResponse, GuidelineResponse, IntegrationHealth, SubmissionCreate, SubmissionResponse, UserCreate, UserResponse, UserStatusUpdate
 
 app = FastAPI(title="BrokerPortal API", version="1.0.0", description="Headless broker operations API")
+app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:4174", "http://localhost:4174", "http://127.0.0.1:4173", "http://localhost:4173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 def correlation(value: str | None) -> str:
     return value or UUID(int=0).hex[:12]

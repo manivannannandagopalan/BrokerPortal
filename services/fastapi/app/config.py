@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     app_name: str = "BrokerPortal API"
     environment: str = "development"
-    database_url: str = "postgresql+asyncpg://postgres:brokerportal-local@localhost:5432/brokerportal"
+    database_url: str = "sqlite+aiosqlite:///./brokerportal.local.db"
     auth0_domain: str = ""
     auth0_audience: str = ""
     duck_creek_base_url: str = ""
